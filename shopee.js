@@ -1,48 +1,54 @@
-const Nightmare = require('nightmare')
-const nightmare = Nightmare({
+const Nightmare = require("nightmare");
+const website = Nightmare({
     show: true
-})
-var userid = '';
-var pw = '';
-var mall = "https://shopee.tw/shopee24h";
+});
 
-nightmare.goto(mall)
-    .wait('.shopee-svg-icon.icon-like-2')
-    .click('.shopee-svg-icon.icon-like-2')
+var userid = "";
+var pw = "";
+var mall = "https://shopee.tw/shopee24h";
+var likeBtnCSS = ".shopee-svg-icon.icon-like-2";
+var nextPageCSS = ".shopee-icon-button.shopee-icon-button--right";
+var inputUseridCSS = ".shopee-authen .input-with-status__input[type=text]";
+var inputPwCSS = ".shopee-authen .input-with-status__input[type=password]";
+var loginBtnCSS = ".shopee-authen .shopee-button-solid.shopee-button-solid--primary";
+
+website.goto(mall)
+    .wait(likeBtnCSS)
+    .click(likeBtnCSS)
     .wait(2000)
-    .type('.shopee-authen .input-with-status__input[type=text]', userid)
-    .type('.shopee-authen .input-with-status__input[type=password]', pw)
+    .type(inputUseridCSS, userid)
+    .type(inputPwCSS, pw)
     .wait(2000)
-    .click('.shopee-authen .shopee-button-solid.shopee-button-solid--primary')
+    .click(loginBtnCSS)
     .wait(25000)
-    .then(async function () {
-        likeThePage(nightmare);
+    .then(async function() {
+        likeAllItems(website);
     });
 
-function likeThePage(nightmare) {
-    nightmare.evaluate(function () {
-        var items = document.querySelectorAll('.shopee-svg-icon.icon-like-2');
+function likeAllItems(website) {
+    website.evaluate(function(likeBtnCSS) {
+        var items = document.querySelectorAll(likeBtnCSS);
         return items.length;
-    })
-    .then(async function (amount) {
-        console.log("Total " + amount + " items");
+    }, likeBtnCSS)
+    .then(async function(amount) {
+        console.log("This page has total " + amount + " items");
         for (var i = 0 ; i < amount ; i++) {
-            await like(nightmare, amount, i);
+            await like(website);
         }
-        console.log('Done');
-        nightmare.evaluate(function () {
-            var nextPage = document.querySelectorAll('.shopee-icon-button.shopee-icon-button--right');
+        console.log('This page done');
+        website.evaluate(function(nextPageCSS) {
+            var nextPage = document.querySelectorAll(nextPageCSS);
             return nextPage.length > 0;
-        }).then(function(hasNext){
+        }, nextPageCSS).then(function(hasNext) {
             if (hasNext) {
-                nightmare.click('.shopee-icon-button.shopee-icon-button--right')
+                website.click(nextPageCSS)
                     .wait(10000)
-                    .then(function(){
-                        likeThePage(nightmare);
+                    .then(function() {
+                        likeAllItems(website);
                     });
             } else {
-                nightmare.end()
-                    .then(function(){
+                website.end()
+                    .then(function() {
                         console.log('All done');
                     });
             }
@@ -50,9 +56,9 @@ function likeThePage(nightmare) {
     });
 }
 
-function like(nightmare, amount, index) {
-    return new Promise(function(res ,rej) {
-        nightmare.click('.shopee-svg-icon.icon-like-2').wait(1000).then(function () {
+function like(website) {
+    return new Promise(function(res) {
+        website.click(likeBtnCSS).wait(1000).then(function() {
             res();
         });
     });
