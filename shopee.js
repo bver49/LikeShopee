@@ -12,11 +12,6 @@ nightmare.goto(mall)
         return items.length;
     })
     .then(async function (amount) {
-        // console.log("Total " + amount + " items");
-        // var index = 0;
-        // like(nightmare, amount, index).then(function () {
-        //     console.log('Done');
-        // });
         console.log("Total " + amount + " items");
         for (var i = 0 ; i < amount ; i++) {
             await like(nightmare, amount, i);
@@ -30,15 +25,4 @@ function like(nightmare, amount, index) {
             res();
         });
     });
-    // if (index != amount) {
-    //     nightmare.click('.shopee-svg-icon.icon-like-2')
-    //         .wait(1000)
-    //         .then(function () {
-    //             console.log('Click ' + index);
-    //             index++;
-    //             like(nightmare, amount, index);
-    //         });
-    // } else {
-    //     return nightmare.end();
-    // }
 }
