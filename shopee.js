@@ -6,11 +6,12 @@ const website = Nightmare({
 var userid = "";
 var pw = "";
 var mall = "https://shopee.tw/shopee24h";
-var likeBtnCSS = ".shopee-svg-icon.icon-like-2";
+var likeBtnCSS = ".shopee-item-card .shopee-svg-icon.icon-like-2";
 var nextPageCSS = ".shopee-icon-button.shopee-icon-button--right";
 var inputUseridCSS = ".shopee-authen .input-with-status__input[type=text]";
 var inputPwCSS = ".shopee-authen .input-with-status__input[type=password]";
 var loginBtnCSS = ".shopee-authen .shopee-button-solid.shopee-button-solid--primary";
+var followBtnCSS = ".b2c-shop-name-action__follow .shopee-button-outline";
 
 website.goto(mall)
     .wait(likeBtnCSS)
@@ -20,7 +21,13 @@ website.goto(mall)
     .type(inputPwCSS, pw)
     .wait(2000)
     .click(loginBtnCSS)
-    .wait(25000)
+    .wait(20000)
+    .evaluate(function(followBtnCSS) {
+        var followBtn = document.querySelector(followBtnCSS);
+        if (followBtn) {
+            followBtn.click();
+        }
+    }, followBtnCSS)
     .then(async function() {
         likeAllItems(website);
     });
