@@ -9,6 +9,7 @@
     </script>
     <script src="https://code.jquery.com/jquery-3.2.1.js"></script>
     <script src="./index.js" charset="utf-8"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.3/vue.min.js'></script>
 </head>
 <body>
     <div id="app" class="container">
@@ -17,25 +18,31 @@
                 <h3 class="text-center">蝦皮自動按愛心工具</h3>
                 <br>
                 <div id="error" style="color:red;">
+                    <template v-for="error in errors">
+                        <p>{{ error }}</p>
+                    </template>
                 </div>
                 <form>
                     <div class="form-group">
                         <label>蝦皮帳號</label>
-                        <input id="userid" class="form-control" type="text" name="userid">
+                        <input v-model="userid" class="form-control" type="text" name="userid">
                     </div>
                     <div class="form-group">
                         <label>蝦皮密碼</label>
-                        <input id="password" class="form-control" type="password" name="password">
+                        <input v-model="password" class="form-control" type="password" name="password">
                     </div>
                     <div class="form-group">
                         <label>賣場連結</label>
-                        <input id="mall" class="form-control" type="text" name="mall" placeholder="https://shopee.tw/shopee24h">
+                        <input v-model="mall" class="form-control" type="text" name="mall" placeholder="https://shopee.tw/shopee24h">
                     </div>
                 </form>
                 <div id="log">
+                    <template v-for="log in logs">
+                        <p>{{ log }}</p>
+                    </template>
                 </div>
-                <div id="start" class="btn btn-primary">開始</div>
-                <div id="stop" class="btn btn-danger">停止</div>
+                <div v-if="status == 0" v-on:click="start" class="btn btn-primary">開始</div>
+                <div v-if="status != 0" v-on:click="stop" class="btn btn-danger">停止</div>
             </div>
         </div>
     </div>

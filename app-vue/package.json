@@ -1,0 +1,19 @@
+{
+  "name": "shopee",
+  "version": "1.0.0",
+  "description": "like item o shopee",
+  "repository": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "electron app.js",
+    "build": "electron-packager ."
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^1.4.12",
+    "electron-packager": "^12.1.0"
+  },
+  "dependencies": {
+    "nightmare": "^3.0.1"
+  }
+}

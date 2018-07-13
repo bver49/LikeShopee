@@ -1,56 +1,49 @@
 $(function() {
     const Nightmare = require("nightmare");
-    var website = Nightmare({
-        electronPath: require('./node_modules/electron'),
-        show: true
-    });
 
-    var app = new Vue({
-        el:"#app",
-        data:{
-            "website": website,
-            "userid": "",
-            "password": "",
-            "mall": "",
-            "status": 0,
-            "errors": [],
-            "logs": []
-        },
-        methods:{
-            start: function() {
-                app.errors = [];
-                if (app.userid == "") {
-                    app.errors.push("請輸入蝦皮帳號");
+    var likeBtnCSS = ".shopee-item-card .shopee-svg-icon.icon-like-2";
+    var nextPageCSS = ".shopee-icon-button.shopee-icon-button--right";
+    var inputUseridCSS = ".shopee-authen .input-with-status__input[type=text]";
+    var inputPwCSS = ".shopee-authen .input-with-status__input[type=password]";
+    var loginBtnCSS = ".shopee-authen .shopee-button-solid.shopee-button-solid--primary";
+    var followBtnCSS = ".b2c-shop-name-action__follow .shopee-button-outline";
+
+    $("#start").on("click", function(){
+        var userid = $("#userid").val();
+        var password = $("#password").val();
+        var mall = $("#mall").val();
+        $("#error").empty();
+        var errors = [];
+        if (userid == "") {
+            errors.push("請輸入蝦皮帳號");
                 }
-                if (app.password == "") {
-                    app.errors.push("請輸入蝦皮密碼");
+        if (password == "") {
+            errors.push("請輸入蝦皮密碼");
                 }
-                if (app.mall == "") {
-                    app.errors.push("請輸入蝦皮賣場網址");
+        if (mall == "") {
+            errors.push("請輸入蝦皮賣場網址");
                 }
-                if (app.errors.length == 0) {
-                    app.status = 1;
-                    start(app.website, app.userid, app.password, app.mall);
-                }
-            },
-            stop: function() {
-                app.website.end().then(function() {
-                    console.log('Stop by user');
-                    app.status = 0;
-                });
+        if (errors.length == 0) {
+            start(userid, password, mall);
+        } else {
+            for (var i in errors) {
+                $("#error").append("<p>" + errors[i] + "</p>");
             }
         }
     });
 
-    function start(website, userid, pw, mall) {
-
-        var likeBtnCSS = ".shopee-item-card .shopee-svg-icon.icon-like-2";
-        var nextPageCSS = ".shopee-icon-button.shopee-icon-button--right";
-        var inputUseridCSS = ".shopee-authen .input-with-status__input[type=text]";
-        var inputPwCSS = ".shopee-authen .input-with-status__input[type=password]";
-        var loginBtnCSS = ".shopee-authen .shopee-button-solid.shopee-button-solid--primary";
-        var followBtnCSS = ".b2c-shop-name-action__follow .shopee-button-outline";
-
+    function start(userid, pw, mall) {
+        var website = Nightmare({
+            electronPath: require('./node_modules/electron'),
+            show: true
+        });
+        $("#stop").unbind("click");
+        $("#stop").on("click", function(){
+            website.end()
+            .then(function() {
+                log("使用者停止操作");
+            });
+        });
         website.goto(mall)
             .wait(likeBtnCSS)
             .click(likeBtnCSS)
@@ -67,21 +60,25 @@ $(function() {
                 }
             }, followBtnCSS)
             .then(async function() {
-                likeAllItems(website);
+                log("開始按愛心");
+                likeAllItems(website, 1);
+            }).catch(function(err){
+                log(err);
             });
     }
 
-    function likeAllItems(website) {
+    function likeAllItems(website, page) {
         website.evaluate(function(likeBtnCSS) {
             var items = document.querySelectorAll(likeBtnCSS);
             return items.length;
         }, likeBtnCSS)
         .then(async function(amount) {
-            console.log("This page has total " + amount + " items");
+            log("第" + page + "頁有 " + amount + " 個商品需要按愛心");
             for (var i = 0 ; i < amount ; i++) {
                 await like(website);
             }
-            console.log('This page done');
+            log("第" + page + "頁處理完畢");
+            page++;
             website.evaluate(function(nextPageCSS) {
                 var nextPage = document.querySelectorAll(nextPageCSS);
                 return nextPage.length > 0;
@@ -90,16 +87,17 @@ $(function() {
                     website.click(nextPageCSS)
                         .wait(10000)
                         .then(function() {
-                            likeAllItems(website);
+                            likeAllItems(website, page);
                         });
                 } else {
                     website.end()
                         .then(function() {
-                            app.status = 0;
-                            console.log('All done');
+                            log("此賣場按愛心完畢");
                         });
                 }
             });
+        }).catch(function(err){
+            log(err);
         });
     }
 
@@ -107,7 +105,13 @@ $(function() {
         return new Promise(function(res) {
             website.click(likeBtnCSS).wait(1000).then(function() {
                 res();
+            }).catch(function(err){
+                log(err);
             });
         });
+    }
+
+    function log(content) {
+        $("#log").append("<p>" + content + "</p>");
     }
 });
